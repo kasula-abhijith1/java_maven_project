@@ -1,4 +1,4 @@
-name: Docker Image Build
+name: Java Maven Build, Publish Artifact & Docker Image
 
 on:
   push:
@@ -7,15 +7,46 @@ on:
     branches: [ "main" ]
 
 jobs:
-  docker-build:
+  build_test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v2 # Updated to version 2
+    - name: Set up JDK 17
+      uses: actions/setup-java@v2 # Updated to version 2
+      with:
+        java-version: '17'
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+
+  publish-job:
+    runs-on: ubuntu-latest
+    needs: build_test
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2 # Updated to version 2
+    - name: Set up JDK 17
+      uses: actions/setup-java@v2 # Updated to version 2
+      with:
+        java-version: '17'
+    - run: mvn --batch-mode --update-snapshots verify
+    - run: mkdir staging && cp target/*.jar staging
+    - uses: actions/upload-artifact@v2 # Updated to version 2
+      with:
+        name: Package
+        path: staging
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: build_test
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2 # Updated to version 2
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      uses: docker/setup-buildx-action@v1 # Keep this version as there's no newer release yet
     - name: Build Docker image
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v2 # Updated to version 2
       with:
         context: .
         file: ./Dockerfile
-        push: false
+        push: false # This will not push the image to a registry

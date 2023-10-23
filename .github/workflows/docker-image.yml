@@ -36,6 +36,7 @@ jobs:
 
       - name: Save Docker image
         run: |
+          docker pull my-image:latest # Pull the image from the local cache or registry
           docker save -o my-image.tar my-image:latest
           echo "::set-output name=docker_image::my-image.tar"
 

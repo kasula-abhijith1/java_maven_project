@@ -15,7 +15,7 @@ jobs:
       - name: Set up Node.js 16
         uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version: 16 # Use Node.js version 16 explicitly
 
       - name: Checkout code
         uses: actions/checkout@v2
@@ -43,4 +43,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: docker-image
-          path: my-image.ta
+          path: my-image.tar
